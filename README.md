@@ -7,5 +7,4 @@ Use `-i <NUMBER>` or `--interval <NUMBER>` to specify the wait time between chan
 Currently only supports jpg and png, until I can find a complete list of filetypes supported by feh
 
 ####TODO
-- Add support for image names with spaces
 - Figure out which filetypes feh/Imlib2 actually supports
