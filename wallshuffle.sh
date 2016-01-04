@@ -61,7 +61,7 @@ fi
 if (( ${#images[@]} < 1 )); then
 	die 'No images found'
 elif (( ${#images[@]} == 1 )); then
-	feh --bg-fill ${images[@]}
+	feh --bg-fill "${images[@]}"
 	exit
 fi
 
