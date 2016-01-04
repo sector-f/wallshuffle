@@ -1,47 +1,73 @@
 #!/usr/bin/env bash
 
-SHORT="i:"
-LONG="interval:"
-OPTIONS=$(getopt -o "$SHORT" -l "$LONG" -n "$(basename $0)" -- "$@")
-eval set -- "$OPTIONS"
+declare interval
+declare recursive=false
+declare -a images
+declare -a search_dirs
+declare verbose=false
 
-shopt -s nullglob
-IFS=$'\n'
+err() {
+	echo -e "\e[31m$1\e[0m" >&2
+}
 
-for argument in $@; do
+die() {
+	[[ -n "$1" ]] && err "$1"
+	exit 1
+}
+
+while :; do
 	case "$1" in
+		-v|--verbose)
+			unset verbose
+			shift
+			;;
+		-r|--recursive)
+			unset recursive
+			shift
+			;;
 		-i|--interval)
-			interval="$2"
-			shift 2
+			if [[ "$2" =~ ^[0-9]+$ ]]; then
+				interval="$2"
+				shift 2
+			fi
 			;;
 		*)
 			if [[ -d "$1" ]]; then
-				cd $1
-				images+=("$(dirname $1)/$(basename $1)"/*.{jpg,jpeg,png})
+				search_dirs+=( "$1" )
+				shift
 			elif [[ -f "$1" ]]; then
-				images+=("$1")
+				if [[ "$1" =~ \.(jpeg|jpg|png)$ ]]; then
+					images+=( "$1" )
+				elif [[ -z $verbose ]]; then
+					err "$1 is not an acceptable file, must be png or jpg"
+				fi
+				shift
+			else
+				break
 			fi
-			shift
 			;;
 	esac
 done
 
-if [[ "${#images[@]}" -eq 0 ]]; then
-	echo "No images specified"
-	exit 1
-elif [[ "${#images[@]}" -eq 1 ]]; then
-	feh --bg-fill "${images[@]}"
+if (( ${#search_dirs[@]} > 0 )); then
+	for d in "${search_dirs[@]}"; do
+		files=$(find $(realpath "$d") ${recursive:+-maxdepth 1} -iregex '.*\.\(jpeg\|jpg\|png\)')
+		mapfile -t -O ${#images[@]} images <<< "$files"
+	done
+fi
+
+[[ -z $verbose ]] && echo "${#images[@]} images found"
+
+if (( ${#images[@]} < 1 )); then
+	die 'No images found'
+elif (( ${#images[@]} == 1 )); then
+	feh --bg-fill ${images[@]}
 	exit
 fi
 
-shuffleimages() {
-	for image in "${images[@]}"; do
-		echo "$image"
-	done | shuf
-}
-
 while true; do
-	for image in $(shuffleimages); do
+	printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
+		[[ -z $verbose ]] && echo "Loading $image"
 		feh --bg-fill "$image"
 		sleep ${interval:-60}
 	done
