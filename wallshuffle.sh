@@ -15,38 +15,38 @@ die() {
 	exit 1
 }
 
-while :; do
-	case "$1" in
-		-v|--verbose)
+while getopts ':vri:' option; do
+	case "$option" in
+		v)
 			unset verbose
-			shift
 			;;
-		-r|--recursive)
+		r)
 			unset recursive
-			shift
 			;;
-		-i|--interval)
-			if [[ "$2" =~ ^[0-9]+$ ]]; then
-				interval="$2"
-				shift 2
+		i)
+			if [[ "$OPTARG" =~ ^[0-9]+$ ]]; then
+				interval="$OPTARG"
 			fi
 			;;
-		*)
-			if [[ -d "$1" ]]; then
-				search_dirs+=( "$1" )
-				shift
-			elif [[ -f "$1" ]]; then
-				if [[ "$1" =~ \.(jpeg|jpg|png)$ ]]; then
-					images+=( "$1" )
-				elif [[ -z $verbose ]]; then
-					err "$1 is not an acceptable file, must be png or jpg"
-				fi
-				shift
-			else
-				break
-			fi
+		\?)
+			err "-$OPTARG is not a valid option"
 			;;
 	esac
+done
+shift $((OPTIND-1))
+
+for argument in $@; do
+	if [[ -d "$1" ]]; then
+		search_dirs+=( "$1" )
+		shift
+	elif [[ -f "$1" ]]; then
+		if [[ "$1" =~ \.(jpeg|jpg|png)$ ]]; then
+			images+=( "$1" )
+		elif [[ -z $verbose ]]; then
+			err "$1 is not an acceptable file, must be png or jpg"
+		fi
+		shift
+	fi
 done
 
 if (( ${#search_dirs[@]} > 0 )); then
