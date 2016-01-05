@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-declare interval
+declare duration=60
 declare recursive=false
 declare -a images
 declare -a search_dirs
@@ -15,32 +15,23 @@ die() {
 	exit 1
 }
 
-bold() {
-	echo "$(tput bold)$1$(tput sgr0)"
-}
+usage() {
+	more <<-'HELP'
+wallshuffle.sh - wallpaper shuffling script
+[-v] [-r] [ -i NUMBER] DIRECTORY... IMAGE...
 
-italic() {
-	echo "$(tput sitm)$1$(tput sgr0)"
-}
-
-printhelp() {
-	bold "NAME"
-	echo -e "\twallshuffle.sh - wallpaper shuffling script written in bash\n"
-	bold "SYNOPSIS"
-	echo -e "\t$(bold wallshuffle.sh) [$(bold -v)] [$(bold -r)] [$(bold -i) $(italic NUMBER)] $(italic DIRECTORY)... $(italic IMAGE)...\n"
-	# bold "DESCRIPTION"
-	bold "OPTIONS"
-	echo -e "\t$(bold -i) $(italic NUMBER) - Set interval (in seconds) between wallpaper changes (default: 60)\n"
-	echo -e "\t$(bold -r) - Recursively find images in directories\n"
-	echo -e "\t$(bold -h) - Print this help information\n"
-	echo -e "\t$(bold -v) - Enable verbose output\n"
-	exit
+-d NUMBER  - Set duration (in seconds) between wallpaper changes (default: 60)
+-r         - Recursively find images in directories
+-h         - Print this help information
+-v         - Enable verbose output
+HELP
 }
 
 while getopts ':vri:h' option; do
 	case "$option" in
 		h)
-			printhelp
+			usage
+			exit
 			;;
 		v)
 			unset verbose
@@ -48,9 +39,9 @@ while getopts ':vri:h' option; do
 		r)
 			unset recursive
 			;;
-		i)
+		d)
 			if [[ "$OPTARG" =~ ^[0-9]+$ ]]; then
-				interval="$OPTARG"
+				duration="$OPTARG"
 			fi
 			;;
 		\?)
@@ -61,7 +52,8 @@ done
 shift $((OPTIND-1))
 
 if [[ -z "$1" ]]; then
-	printhelp
+	usage
+	exit 1
 fi
 
 for argument in $@; do
@@ -98,6 +90,6 @@ while true; do
 	printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
 		[[ -z $verbose ]] && echo "Loading $image"
 		feh --bg-fill "$image"
-		sleep ${interval:-60}
+		sleep "$duration"
 	done
 done
