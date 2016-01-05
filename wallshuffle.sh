@@ -15,8 +15,33 @@ die() {
 	exit 1
 }
 
-while getopts ':vri:' option; do
+bold() {
+	echo "$(tput bold)$1$(tput sgr0)"
+}
+
+italic() {
+	echo "$(tput sitm)$1$(tput sgr0)"
+}
+
+printhelp() {
+	bold "NAME"
+	echo -e "\twallshuffle.sh - wallpaper shuffling script written in bash\n"
+	bold "SYNOPSIS"
+	echo -e "\t$(bold wallshuffle.sh) [$(bold -v)] [$(bold -r)] [$(bold -i) $(italic NUMBER)] $(italic DIRECTORY)... $(italic IMAGE)...\n"
+	# bold "DESCRIPTION"
+	bold "OPTIONS"
+	echo -e "\t$(bold -i) $(italic NUMBER) - Set interval (in seconds) between wallpaper changes (default: 60)\n"
+	echo -e "\t$(bold -r) - Recursively find images in directories\n"
+	echo -e "\t$(bold -h) - Print this help information\n"
+	echo -e "\t$(bold -v) - Enable verbose output\n"
+	exit
+}
+
+while getopts ':vri:h' option; do
 	case "$option" in
+		h)
+			printhelp
+			;;
 		v)
 			unset verbose
 			;;
@@ -34,6 +59,10 @@ while getopts ':vri:' option; do
 	esac
 done
 shift $((OPTIND-1))
+
+if [[ -z "$1" ]]; then
+	printhelp
+fi
 
 for argument in $@; do
 	if [[ -d "$1" ]]; then
