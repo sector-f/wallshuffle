@@ -32,7 +32,7 @@ wallshuffle.sh - wallpaper shuffling script
 HELP
 }
 
-while getopts ':vri:ho' option; do
+while getopts ':vrd:ho' option; do
 	case "$option" in
 		h)
 			usage
