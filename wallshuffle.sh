@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+<<<<<<< HEAD
+=======
+declare duration=60
+>>>>>>> 719f853159e24ab7f4a4a7a5790302499c44095b
 declare recursive=false
 declare verbose=false
 declare oneshot=false
@@ -19,6 +23,7 @@ die() {
 	exit 1
 }
 
+<<<<<<< HEAD
 printhelp() {
 	echo "${bold}NAME${reset}
 	$(basename $0) - wallpaper shuffling script written in bash
@@ -47,12 +52,25 @@ ${bold}OPTIONS${reset}
 
 	${bold}-v${reset} - Enable verbose output"
 	exit
+=======
+usage() {
+	more <<-'HELP'
+wallshuffle.sh - wallpaper shuffling script
+[-v] [-r] [ -i NUMBER] DIRECTORY... IMAGE...
+
+-d NUMBER  - Set duration (in seconds) between wallpaper changes (default: 60)
+-r         - Recursively find images in directories
+-h         - Print this help information
+-v         - Enable verbose output
+HELP
+>>>>>>> 719f853159e24ab7f4a4a7a5790302499c44095b
 }
 
 while getopts ':vri:ho' option; do
 	case "$option" in
 		h)
-			printhelp
+			usage
+			exit
 			;;
 		o)
 			unset oneshot
@@ -63,9 +81,9 @@ while getopts ':vri:ho' option; do
 		r)
 			unset recursive
 			;;
-		i)
+		d)
 			if [[ "$OPTARG" =~ ^[0-9]+$ ]]; then
-				interval="$OPTARG"
+				duration="$OPTARG"
 			fi
 			;;
 		\?)
@@ -76,7 +94,8 @@ done
 shift $((OPTIND-1))
 
 if [[ -z "$1" ]]; then
-	printhelp
+	usage
+	exit 1
 fi
 
 for argument in $@; do
@@ -109,6 +128,7 @@ elif (( ${#images[@]} == 1 )); then
 	exit
 fi
 
+<<<<<<< HEAD
 if [[ -n "$oneshot" ]]; then
 	while true; do
 		printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
@@ -116,6 +136,13 @@ if [[ -n "$oneshot" ]]; then
 			feh --bg-fill "$image"
 			sleep ${interval:-60}
 		done
+=======
+while true; do
+	printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
+		[[ -z $verbose ]] && echo "Loading $image"
+		feh --bg-fill "$image"
+		sleep "$duration"
+>>>>>>> 719f853159e24ab7f4a4a7a5790302499c44095b
 	done
 else
 	mapfile -t images < <(printf '%s\n' "${images[@]}" | shuf)
