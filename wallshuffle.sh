@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
 
-<<<<<<< HEAD
-=======
 declare duration=60
->>>>>>> 719f853159e24ab7f4a4a7a5790302499c44095b
 declare recursive=false
 declare verbose=false
 declare oneshot=false
 declare bold="$(tput bold)"
 declare italic="$(tput sitm)"
 declare reset="$(tput sgr0)"
-declare interval
 declare -a images
 declare -a search_dirs
 
@@ -23,47 +19,17 @@ die() {
 	exit 1
 }
 
-<<<<<<< HEAD
-printhelp() {
-	echo "${bold}NAME${reset}
-	$(basename $0) - wallpaper shuffling script written in bash
-
-${bold}SYNOPSIS${reset}
-	${bold}$(basename $0)${reset} [${bold}-v${reset}] [${bold}-r${reset}] [${bold}-i${reset} ${italic}NUMBER${reset}|${bold}-o${reset}] ${italic}DIRECTORY${reset}... ${italic}IMAGE${reset}...
-
-${bold}Description${reset}
-	$(basename $0) is a bash script written to simplify randomizing
-	your desktop wallpaper. It allows any number of images or
-	directories to be specified, then randomly cycles through
-	the given images and the images contained within the given
-	directories. If only one image is found/specified, it will
-	set that image as the wallpaper and exit.
-
-${bold}OPTIONS${reset}
-	${bold}-h${reset} - Print this help information
-
-	${bold}-i${reset} ${italic}NUMBER${reset} - Set interval (in seconds) between wallpaper
-		    changes (default: 60)
-
-	${bold}-r${reset} - Recursively find images in directores
-
-	${bold}-o${reset} - Randomly select a single image from the specified directories/images
-	     and exit
-
-	${bold}-v${reset} - Enable verbose output"
-	exit
-=======
 usage() {
 	more <<-'HELP'
 wallshuffle.sh - wallpaper shuffling script
-[-v] [-r] [ -i NUMBER] DIRECTORY... IMAGE...
+[-v] [-r] [-d NUMBER|-o] DIRECTORY... IMAGE...
 
 -d NUMBER  - Set duration (in seconds) between wallpaper changes (default: 60)
+-o         - Set a random wallpaper once and quit
 -r         - Recursively find images in directories
 -h         - Print this help information
 -v         - Enable verbose output
 HELP
->>>>>>> 719f853159e24ab7f4a4a7a5790302499c44095b
 }
 
 while getopts ':vri:ho' option; do
@@ -128,21 +94,13 @@ elif (( ${#images[@]} == 1 )); then
 	exit
 fi
 
-<<<<<<< HEAD
 if [[ -n "$oneshot" ]]; then
 	while true; do
 		printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
 			[[ -z $verbose ]] && echo "Loading $image"
 			feh --bg-fill "$image"
-			sleep ${interval:-60}
+			sleep $duration
 		done
-=======
-while true; do
-	printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
-		[[ -z $verbose ]] && echo "Loading $image"
-		feh --bg-fill "$image"
-		sleep "$duration"
->>>>>>> 719f853159e24ab7f4a4a7a5790302499c44095b
 	done
 else
 	mapfile -t images < <(printf '%s\n' "${images[@]}" | shuf)
