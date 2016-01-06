@@ -3,9 +3,13 @@
 Usage: **wallshuffle.sh** [**-r**] [**-v**] [**-i** *NUMBER*] *IMAGE OR DIRECTORY*...
 
 #### OPTIONS
+`-h` Print help information
+
 `-i <NUMBER>` Specify the wait time between changing wallpapers, in seconds. The default is 60.
 
 `-r` Recursively find images inside directories
+
+`-o` Randomly select a single image from the specified directories/images and exit
 
 `-v` Output more information about what the script is doing
 

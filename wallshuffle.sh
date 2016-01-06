@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
-declare interval
 declare recursive=false
+declare verbose=false
+declare oneshot=false
+declare bold="$(tput bold)"
+declare italic="$(tput sitm)"
+declare reset="$(tput sgr0)"
+declare interval
 declare -a images
 declare -a search_dirs
-declare verbose=false
 
 err() {
 	echo -e "\e[31m$1\e[0m" >&2
@@ -15,32 +19,43 @@ die() {
 	exit 1
 }
 
-bold() {
-	echo "$(tput bold)$1$(tput sgr0)"
-}
-
-italic() {
-	echo "$(tput sitm)$1$(tput sgr0)"
-}
-
 printhelp() {
-	bold "NAME"
-	echo -e "\twallshuffle.sh - wallpaper shuffling script written in bash\n"
-	bold "SYNOPSIS"
-	echo -e "\t$(bold wallshuffle.sh) [$(bold -v)] [$(bold -r)] [$(bold -i) $(italic NUMBER)] $(italic DIRECTORY)... $(italic IMAGE)...\n"
-	# bold "DESCRIPTION"
-	bold "OPTIONS"
-	echo -e "\t$(bold -i) $(italic NUMBER) - Set interval (in seconds) between wallpaper changes (default: 60)\n"
-	echo -e "\t$(bold -r) - Recursively find images in directories\n"
-	echo -e "\t$(bold -h) - Print this help information\n"
-	echo -e "\t$(bold -v) - Enable verbose output\n"
+	echo "${bold}NAME${reset}
+	$(basename $0) - wallpaper shuffling script written in bash
+
+${bold}SYNOPSIS${reset}
+	${bold}$(basename $0)${reset} [${bold}-v${reset}] [${bold}-r${reset}] [${bold}-i${reset} ${italic}NUMBER${reset}|${bold}-o${reset}] ${italic}DIRECTORY${reset}... ${italic}IMAGE${reset}...
+
+${bold}Description${reset}
+	$(basename $0) is a bash script written to simplify randomizing
+	your desktop wallpaper. It allows any number of images or
+	directories to be specified, then randomly cycles through
+	the given images and the images contained within the given
+	directories. If only one image is found/specified, it will
+	set that image as the wallpaper and exit.
+
+${bold}OPTIONS${reset}
+	${bold}-h${reset} - Print this help information
+
+	${bold}-i${reset} ${italic}NUMBER${reset} - Set interval (in seconds) between wallpaper
+		    changes (default: 60)
+
+	${bold}-r${reset} - Recursively find images in directores
+
+	${bold}-o${reset} - Randomly select a single image from the specified directories/images
+	     and exit
+
+	${bold}-v${reset} - Enable verbose output"
 	exit
 }
 
-while getopts ':vri:h' option; do
+while getopts ':vri:ho' option; do
 	case "$option" in
 		h)
 			printhelp
+			;;
+		o)
+			unset oneshot
 			;;
 		v)
 			unset verbose
@@ -94,10 +109,16 @@ elif (( ${#images[@]} == 1 )); then
 	exit
 fi
 
-while true; do
-	printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
-		[[ -z $verbose ]] && echo "Loading $image"
-		feh --bg-fill "$image"
-		sleep ${interval:-60}
+if [[ -n "$oneshot" ]]; then
+	while true; do
+		printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
+			[[ -z $verbose ]] && echo "Loading $image"
+			feh --bg-fill "$image"
+			sleep ${interval:-60}
+		done
 	done
-done
+else
+	mapfile -t images < <(printf '%s\n' "${images[@]}" | shuf)
+	[[ -z $verbose ]] && echo "Loading ${images[0]}"
+	feh --bg-fill ${images[0]}
+fi
