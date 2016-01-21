@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Configuration
 declare duration=60
 declare recursive=false
 declare verbose=false
@@ -10,8 +11,49 @@ declare reset="$(tput sgr0)"
 declare -a images
 declare -a search_dirs
 
+# Colors
+esc="\033"
+bld="${esc}[1m"            #  Bold
+rst="${esc}[0m"            #  Reset
+
+bla="${esc}[30m"           #  Black          - Text
+red="${esc}[31m"           #  Red            - Text
+grn="${esc}[32m"           #  Green          - Text
+ylw="${esc}[33m"           #  Yellow         - Text
+blu="${esc}[34m"           #  Blue           - Text
+mag="${esc}[35m"           #  Magenta        - Text
+cya="${esc}[36m"           #  Cyan           - Text
+whi="${esc}[37m"           #  Light Grey     - Text
+
+bldbla=${bld}${bla}        #  Dark Grey      - Text
+bldred=${bld}${red}        #  Red            - Bold Text
+bldgrn=${bld}${grn}        #  Green          - Bold Text
+bldylw=${bld}${ylw}        #  Yellow         - Bold Text
+bldblu=${bld}${blu}        #  Blue           - Bold Text
+bldmag=${bld}${mag}        #  Magenta        - Bold Text
+bldcya=${bld}${cya}        #  Cyan           - Bold Text
+bldwhi=${bld}${whi}        #  White          - Text
+
+bgbla="${esc}[40m"         #  Black          - Background
+bgred="${esc}[41m"         #  Red            - Background
+bggrn="${esc}[42m"         #  Green          - Background
+bgylw="${esc}[43m"         #  Yellow         - Background
+bgblu="${esc}[44m"         #  Blue           - Background
+bgmag="${esc}[45m"         #  Magenta        - Background
+bgcya="${esc}[46m"         #  Cyan           - Background
+bgwhi="${esc}[47m"         #  Light Grey     - Background
+
+bldbgbla=${bld}${bgbla}    #  Dark Grey      - Background
+bldbgred=${bld}${bgred}    #  Red            - Bold Background
+bldbggrn=${bld}${bggrn}    #  Green          - Bold Background
+bldbgylw=${bld}${bgylw}    #  Yellow         - Bold Background
+bldbgblu=${bld}${bgblu}    #  Blue           - Bold Background
+bldbgmag=${bld}${bgmag}    #  Magenta        - Bold Background
+bldbgcya=${bld}${bgcya}    #  Cyan           - Bold Background
+bldbgwhi=${bld}${bgwhi}    #  White          - Background
+
 err() {
-	echo -e "\e[31m$1\e[0m" >&2
+	echo -e ${red}"$1"${rst} >&2
 }
 
 die() {
