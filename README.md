@@ -11,6 +11,8 @@ Usage: **wallshuffle.sh** [**-r**] [**-v**] [**-d** *NUMBER*|**-o**] [**-b** *NU
 
 `-b <NUMBER>` Specify the blur radius; only works if hsetroot is used
 
+`-t <NUMBER>` Specify the tint value (#FFFFFF is not change); only works if hsetroot is used
+
 `-p <PROGRAM>` Specify which program to use; either 'hsetroot' or 'feh'
 
 `-r` Recursively find images inside directories
