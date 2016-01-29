@@ -28,6 +28,10 @@ die() {
 	exit 1
 }
 
+inpath() {
+	type "$1" &> /dev/null
+}
+
 usage() {
 	more <<-'HELP'
 wallshuffle.sh - wallpaper shuffling script
@@ -46,6 +50,9 @@ The following options only work if hsetroot is used
 HELP
 }
 
+###########
+# Options #
+###########
 while getopts ':vrd:hob:p:t:' option; do
 	case "$option" in
 		h)
@@ -86,9 +93,9 @@ shift $((OPTIND-1))
 if [[ -n "$program" ]]; then
 	case "$program" in
 		hsetroot)
-			if ! type hsetroot &> /dev/null; then
+			if ! inpath hsetroot; then
 				echo 'Specified program 'hsetroot' is not in $PATH'
-				if type feh &> /dev/null; then
+				if inpath feh; then
 					echo 'Falling back to feh'
 					program="feh"
 				else
@@ -98,9 +105,9 @@ if [[ -n "$program" ]]; then
 			fi
 			;;
 		feh)
-			if ! type feh &> /dev/null; then
+			if ! inpath feh; then
 				echo 'Specified program 'feh' is not in $PATH'
-				if type hsetroot &> /dev/null; then
+				if inpath hsetroot; then
 					echo 'Falling back to hsetroot'
 					program="hsetroot"
 				else
@@ -116,9 +123,9 @@ if [[ -n "$program" ]]; then
 	esac
 # ...otherwise, determine the program automatically
 else
-	if type hsetroot &> /dev/null; then
+	if inpath hsetroot; then
 		program="hsetroot"
-	elif type feh &> /dev/null; then
+	elif inpath feh; then
 		program="feh"
 	else
 		echo "This script depends on either hsetroot or feh"
@@ -130,6 +137,10 @@ fi
 if [[ -z "$1" ]]; then
 	usage
 	exit 1
+fi
+
+if [[ -z $verbose ]]; then
+	echo "Using $program"
 fi
 
 if [[ -n "$blurvalue" ]]; then
@@ -171,46 +182,41 @@ if (( ${#search_dirs[@]} > 0 )); then
 	done
 fi
 
-[[ -z $verbose ]] && echo "${#images[@]} images found"
-
 if (( ${#images[@]} < 1 )); then
 	die 'No images found'
-elif (( ${#images[@]} == 1 )); then
-	case $program in
-		hsetroot)
-			hsetroot -fill "${images[@]}" -blur ${blurvalue:-0} -tint ${tintvalue:-#ffffff}
-			;;
-		feh)
-			feh --bg-fill "${images[@]}"
-			;;
-	esac
-	exit
+elif (( ${#images[@]} == 1 )) && [[ -z $verbose ]]; then
+	echo "1 image found"
+elif (( ${#images[@]} > 1 )) && [[ -z $verbose ]]; then
+	echo "${#images[@]} images found"
 fi
 
-if [[ -n "$oneshot" ]]; then
-	while true; do
-		printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
-			[[ -z $verbose ]] && echo "Loading $image"
-			case $program in
-				hsetroot)
-					hsetroot -fill "$image" -blur ${blurvalue:-0} -tint ${tintvalue:-#ffffff}
-					;;
-				feh)
-					feh --bg-fill "$image"
-					;;
-			esac
-			sleep $duration
-		done
-	done
-else
-	mapfile -t images < <(printf '%s\n' "${images[@]}" | shuf)
+if (( ${#images[@]} == 1 )) || [[ -z "$oneshot" ]]; then
+	if [[ -z "$oneshot" ]]; then
+		mapfile -t images < <(printf '%s\n' "${images[@]}" | shuf)
+	fi
 	[[ -z $verbose ]] && echo "Loading ${images[0]}"
 	case $program in
 		hsetroot)
 			hsetroot -fill "${images[0]}" -blur ${blurvalue:-0} -tint ${tintvalue:-#ffffff}
 			;;
 		feh)
-			feh --bg-fill ${images[0]}
+			feh --bg-fill "${images[0]}"
 			;;
 	esac
+	exit
 fi
+
+while true; do
+	printf '%s\n' "${images[@]}" | shuf | while IFS= read -r image; do
+		[[ -z $verbose ]] && echo "Loading $image"
+		case $program in
+			hsetroot)
+				hsetroot -fill "$image" -blur ${blurvalue:-0} -tint ${tintvalue:-#ffffff}
+				;;
+			feh)
+				feh --bg-fill "$image"
+				;;
+		esac
+		sleep $duration
+	done
+done
